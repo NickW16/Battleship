@@ -1,5 +1,11 @@
-const sum = require('./main');
+const { ship } = require('./ship');
 
-test('adds 1 + 2 to equal 3', () => {
-  expect(sum(1, 2)).toBe(3);
+const testShip = ship(4);
+
+test('initial hitcount is 0', () => {
+  expect(testShip.getHitCount()).toBe(0); 
+});
+
+test('length is correct', () => {
+  expect(testShip.getLength()).toBe(4);
 });
