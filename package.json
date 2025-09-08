@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "watch": "jest --watch ./src"
   },
   "devDependencies": {
     "css-loader": "^7.1.2",
