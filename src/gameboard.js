@@ -98,7 +98,7 @@ const createGameboard = () => {
     const getMissedAttacks = () => {
         return Array.from(missedAttacks).map(coord => {
             const [x, y] = coord.split(',').map(Number);
-            return { x, y};
+            return {x, y};
         });
     };
 
@@ -121,4 +121,4 @@ const createGameboard = () => {
     }    
 };
 
-module.exports = createGameboard; // export
+module.exports = { createGameboard }; // export
