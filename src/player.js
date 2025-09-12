@@ -1,8 +1,21 @@
-const gameboard = require('./gameboard');
-const ship = require('./ship');
+const { createGameboard } = require('./gameboard');
+const { ship } = require('./ship');
 
-const player = () => {
-    return true;
+// players board initialization
+const playerOne = (CPU=false) => {
+    const gameboard = createGameboard();
+    return {
+        gameboard,
+    }
 };
 
-module.exports =  { player };
+const playerTwo = (CPU=true) => {
+    const gameboard = createGameboard(); 
+    return {
+        gameboard,
+    }
+};
+
+// CPU logic
+
+module.exports =  { playerOne, playerTwo };

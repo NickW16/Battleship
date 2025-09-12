@@ -1,6 +1,12 @@
-const player = require('../player');
+const { playerOne } = require('../player');
+const { playerTwo } = require('../player');
 
-test('testing', () => {
-    const playerTest = player;
-    expect(typeof playerTest).toBe('object');
-})
+test('testing player gameboard', () => {
+    const playerTest = playerOne();
+    expect(playerTest.gameboard.getMissedAttacks).toBeInstanceOf(Object);
+});
+
+test('testing cpu gameboard', () => {
+    const cpuTest = playerTwo();
+    expect(cpuTest.gameboard.board).toBeInstanceOf(Array);
+});
