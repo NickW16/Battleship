@@ -1,5 +1,5 @@
-const { createGameboard } = require('./gameboard');
-const { ship, shipTypes } = require('./ship'); // need this too
+const { createGameboard } = require('../gameboard');
+const { ship, shipTypes } = require('../ship'); // need this too
 
 
 test('gameboard creates a board array', () => {
@@ -95,4 +95,79 @@ test('vertical ship placement edge cases', () => {
     testGameboard.placeShip(ship(shipTypes.BATTLESHIP), 2, 2, true); // place ship first
     expect(testGameboard.placeShip(destroyer, 2, 2, true)).toBe(false); // overlap, should return false
 });
+//attacks test
+test('attacks return false when out of bounds', () => {
+  const testGameboard = createGameboard();
+  const attack = testGameboard.receiveAttack(11, 12);
+  expect(attack).toBe(false);
+});
 
+test('attacking a ship', () => {
+  const testGameboard = createGameboard();
+  const destroyer = ship(shipTypes.DESTROYER);
+  testGameboard.placeShip(destroyer, 6, 5, true);
+  // it hits
+  const attackHits = testGameboard.receiveAttack(7, 5);
+  expect(attackHits).toBe('hit');
+  // it misses
+  const attackMisses = testGameboard.receiveAttack(5, 5);
+  expect(attackMisses).toBe('miss');
+  // the hit is registered on the ship:
+  const boardState = testGameboard.getBoardState();
+  const cellHit = boardState[7][5];
+  expect(cellHit).toEqual({"hasShip": true, "isHit": true, "isSunk": false});
+});
+
+test('missed attacks are properly tracked', () => {
+  const testGameboard = createGameboard();
+
+  // misses
+  testGameboard.receiveAttack(0, 2);
+  testGameboard.receiveAttack(0, 1);
+  testGameboard.receiveAttack(0, 3);
+
+  const missedAttacks = testGameboard.getMissedAttacks();
+  // test attacks
+  expect(missedAttacks).toHaveLength(3);
+  expect(missedAttacks).toContainEqual({x: 0, y: 2});
+  expect(missedAttacks).toContainEqual({x: 0, y: 1});    
+  expect(missedAttacks).toContainEqual({x: 0, y: 3});  
+});
+
+test('cant duplicate attacks', () => {
+  const testGameboard = createGameboard();
+  // attacking to the same tile
+  testGameboard.receiveAttack(0, 1);
+  testGameboard.receiveAttack(0, 1);
+
+  const missedAttacks = testGameboard.getMissedAttacks();
+  expect(missedAttacks).toHaveLength(1);
+});
+
+test('complex game scenario', () => {
+  const testGameboard = createGameboard();
+  const fleet = {
+    carrier: ship(shipTypes.CARRIER),
+    battleship: ship(shipTypes.BATTLESHIP),
+    patrol: ship(shipTypes.PATROLBOAT)
+  };
+
+  testGameboard.placeShip(fleet.carrier, 0, 0, false);
+  testGameboard.placeShip(fleet.battleship, 4, 5, true);
+  testGameboard.placeShip(fleet.patrol, 3, 7, true);
+
+  testGameboard.receiveAttack(0, 0); // hit carrier
+  testGameboard.receiveAttack(0, 1); // hit carrier
+  testGameboard.receiveAttack(0, 2); // hit carrier
+  testGameboard.receiveAttack(0, 3); // hit carrier
+  testGameboard.receiveAttack(0, 4); // destroy carrier
+
+  testGameboard.receiveAttack(3, 2); // miss
+  testGameboard.receiveAttack(2, 2); // miss
+  
+  expect(fleet.carrier.isSunk()).toBe(true);
+  expect(fleet.battleship.isSunk()).toBe(false);
+  expect(fleet.patrol.isSunk()).toBe(false);
+  expect(testGameboard.allShipsSunk()).toBe(false);
+  expect(testGameboard.getMissedAttacks()).toHaveLength(2);
+});
