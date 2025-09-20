@@ -3,6 +3,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-size: 22px;
     height: 100vh;
     background-color: rgb(169, 178, 185);
 }
@@ -29,6 +30,24 @@ body {
     border: 1px solid black
 }
 
+.attacked-tile {
+    background-color: brown;
+}
+
 .board-tile:hover {
     background-color: green;
+}
+
+button {
+    border: 4px solid rgb(37, 90, 61);
+    border-radius: 10px;
+    color: rgb(0, 0, 0);
+    background-color: whitesmoke;
+    font-size: 14px;
+    padding: 4px;
+}
+
+button:hover {
+    background-color: green;
+    color: white;
 }

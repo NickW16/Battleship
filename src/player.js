@@ -2,20 +2,16 @@ const { createGameboard } = require('./gameboard');
 const { ship } = require('./ship');
 
 // players board initialization
-const playerOne = (CPU=false) => {
+const createPlayer = (name, CPU=false) => {
     const gameboard = createGameboard();
     return {
+        name,
         gameboard,
+        isTurn: false, // start with no one's turn, it's handled on game logic
     }
 };
 
-const playerTwo = (CPU=true) => {
-    const gameboard = createGameboard(); 
-    return {
-        gameboard,
-    }
-};
 
 // CPU logic
 
-module.exports =  { playerOne, playerTwo };
+module.exports =  { createPlayer };
