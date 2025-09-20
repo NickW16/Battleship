@@ -1,6 +1,6 @@
 const { createPlayer } = require('./player');
 
-const game = () => {
+const createGame = () => {
     // game state
     const gameState = {
         player1: createPlayer('Player 1'),
@@ -53,4 +53,4 @@ const game = () => {
     };
 }
 
-module.exports = game;
+module.exports = createGame;

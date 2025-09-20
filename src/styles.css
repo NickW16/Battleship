@@ -8,10 +8,12 @@ body {
     background-color: rgb(169, 178, 185);
 }
 
+/* title */
 #title {
     color: rgb(19, 6, 6);
 }
 
+/* gameboards */
 #gameboards-section {
     display: flex;
     gap: 20px;
@@ -24,14 +26,38 @@ body {
     padding: 2px;
 }
 
+/* tiles */
 .board-tile {
-    display: inline-block;
     background-color: lightblue;
-    border: 1px solid black
+    border: 1px solid #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
 }
 
-.attacked-tile {
-    background-color: brown;
+.board-tile.hit {
+    background-color: #ff4444;
+    color: white;
+}
+
+.board-tile.miss {
+    background-color: #4444ff;
+    color: white;
+}
+
+.board-tile.attacked {
+    cursor: not-allowed;
+}
+
+#turn-indicator {
+    background-color: #f0f0f0;
+    padding: 10px 20px;
+    margin: 24px;
+    border-radius: 5px;
+    border: 2px solid #333;
+    text-align: center;
 }
 
 .board-tile:hover {
