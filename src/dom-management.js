@@ -1,8 +1,43 @@
 const createGame = require('./game-logic');
+const { createFleet } = require('./ship');
 const game = createGame(); // initialize the game
+
+const GAME_PHASES = {
+    PLACEMENT: 'placement',
+    BATTLE: 'battle',
+    GAME_OVER: 'game-over',
+}
+
+// start placement:
+let currentPhase = GAME_PHASES.PLACEMENT;
+let currentPlacingPlayer = game.state.player1;
+let currentShipIndex = 0;
+
+const setupGameBoards = (p2CPU = false) => {
+    const { player1, player2 } = game.state();
+    const fleet1 = createFleet();
+    const fleet2 = createFleet();
+
+    // place ships for testing
+    player1.gameboard.placeShip(fleet1.carrier, 0, 0);
+    player1.gameboard.placeShip(fleet1.battleship, 2, 1);
+    player1.gameboard.placeShip(fleet1.destroyer, 4, 2);
+    player1.gameboard.placeShip(fleet1.submarine, 6, 3);
+    player1.gameboard.placeShip(fleet1.patrolboat, 8, 4);
+
+    // ships for player 2
+    player2.gameboard.placeShip(fleet2.carrier, 0, 0, true); // vertical
+    player2.gameboard.placeShip(fleet2.battleship, 1, 2, true);
+    player2.gameboard.placeShip(fleet2.destroyer, 2, 4, true);
+    player2.gameboard.placeShip(fleet2.submarine, 3, 6, true);
+    player2.gameboard.placeShip(fleet2.patrolboat, 4, 8, true);
+}
 
 // dom stuff
 const manageDOM = () => {
+    // setup ships' positioning...
+    setupGameBoards();
+
     const title = document.getElementById('title');
     title.textContent = 'Battleship Game';
 
@@ -102,9 +137,9 @@ const manageDOM = () => {
                         tile.style.pointerEvents = 'none';
                     }
                 });
-            }
+            }            
         });
-    };  
+    }; 
     gameTiles();
 
 };
