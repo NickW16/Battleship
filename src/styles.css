@@ -60,6 +60,10 @@ body {
     text-align: center;
 }
 
+.ship {
+    background-color: rgb(104, 11, 11);
+}
+
 .board-tile:hover {
     background-color: green;
 }
