@@ -27,6 +27,53 @@ const shipsToPlace = [
 
 let isVertical = false; // to track ship orientation
 
+function handlePlacementHover(e) {
+    const tile = e.target;
+    const x = parseInt(tile.dataset.x);
+    const y = parseInt(tile.dataset.y);
+    const shipInfo = shipsToPlace[currentShipIndex];
+    const length = shipInfo.length;
+
+    const tilesToHighlight = [];
+    let isValid = true;
+
+    for (let i = 0; i < length; i++) {
+        // logic for vertical/horizontal
+        const currentX = isVertical ? x + i : x; 
+        const currentY = isVertical ? y : y + i;
+
+        // Check if ship is out of bounds
+        if (currentX >= 10 || currentY >= 10) {
+            isValid = false;
+            break;
+        }
+
+        const selector = `[data-player="${currentPlacingPlayer.name.toLowerCase().replace(' ', '')}"] [data-x="${currentX}"][data-y="${currentY}"]`;
+        const segmentTile = document.querySelector(selector);
+
+        // check if tile exists or is already occupied by a placed ship
+        if (!segmentTile || segmentTile.classList.contains('ship')) {
+            isValid = false;
+            break;
+        }
+        if (segmentTile) {
+            // add to array for highlighting:
+            tilesToHighlight.push(segmentTile);
+        }
+    }    
+    
+    // apply a class based on whether the placement is valid
+    const previewClass = isValid ? 'ship-preview' : 'ship-preview-invalid';
+    tilesToHighlight.forEach(t => t.classList.add(previewClass));
+}
+// for when placement phase ends:
+function handlePlacementLeave() {
+    //find all tiles with a preview class and remove it
+    document.querySelectorAll('.ship-preview, .ship-preview-invalid').forEach(tile => {
+        tile.classList.remove('ship-preview', 'ship-preview-invalid');
+    });
+}
+
 function handleAttack(e) {
     const tile = e.target;
     if (game.isGameOver() || tile.classList.contains('hit') || tile.classList.contains('miss')) return;
@@ -150,7 +197,10 @@ const setupPlacementPhase = () => {
     // add listeners only to the current player's board
     const playerBoard = document.querySelector(`[data-player="${currentPlacingPlayer.name.toLowerCase().replace(' ', '')}"]`);
     playerBoard.querySelectorAll('.board-tile').forEach(tile => {
+        // listeners for hovers and placements:
         tile.addEventListener('click', handleShipPlacement);
+        tile.addEventListener('mouseover', handlePlacementHover);
+        tile.addEventListener('mouseout', handlePlacementLeave);
     });
 };
 
