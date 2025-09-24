@@ -118,7 +118,7 @@ const createGameboard = () => {
         allShipsSunk,
         getMissedAttacks,
         getBoardState
-    }    
+    }
 };
 
 module.exports = { createGameboard }; // export

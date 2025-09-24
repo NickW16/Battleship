@@ -8,6 +8,25 @@ const GAME_PHASES = {
     GAME_OVER: 'game-over',
 }
 
+function switchPlayer(player = 'both') {
+    const gameboards = document.querySelectorAll('.gameboard');
+
+    // identify which gameboards belongs to each player:
+    gameboards[0].dataset.player = 'player1';
+    gameboards[1].dataset.player = 'player2';
+    // player-switching feature:
+    if (player === game.state().player1) {
+        gameboards[0].style.display = 'grid'; // show player 1 board
+        gameboards[1].style.display = 'none';
+    } else if (player === game.state().player2) {
+        gameboards[0].style.display = 'none'; // show player 2 board
+        gameboards[1].style.display = 'grid';
+    } else {
+        gameboards[0].style.display = 'grid'; // show both boards
+        gameboards[1].style.display = 'grid';
+    }
+};
+
 // define stuff for later use in DOM:
 let turnIndicator = document.getElementById('turn-indicator');
 let title = document.getElementById('title');
@@ -26,6 +45,7 @@ const shipsToPlace = [
 ];
 
 let isVertical = false; // to track ship orientation
+
 
 function handlePlacementHover(e) {
     const tile = e.target;
@@ -90,7 +110,6 @@ function handleAttack(e) {
     // only allow attacking the opponent's board:
     if (boardPlayer === targetBoardName) {
         const result = game.attack(currentPlayer, defender, x, y);
-
         // visual effects of hitting or missing:
         if (result === 'hit') {
             tile.classList.add('hit');
@@ -100,6 +119,7 @@ function handleAttack(e) {
             tile.textContent = '💦';
         }
 
+        switchPlayer(currentPlayer);
         // update turn indicator's content
         turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
 
@@ -167,10 +187,12 @@ function handleShipPlacement(e) {
                 // switch to player 2
                 currentPlacingPlayer = game.state().player2;
                 currentShipIndex = 0;
+                switchPlayer(currentPlacingPlayer);
                 // re-run setup for Player 2
                 setupPlacementPhase(); 
             } else {
                 // Both players are done, start the battle
+                switchPlayer(); // show both boards
                 setupBattlePhase();
             }
         }
@@ -256,7 +278,7 @@ const manageDOM = () => {
         }            
     });
 
-    // --- This is the starting point of the game logic ---
+    // this is the starting point of the game logic
     if (currentPhase === GAME_PHASES.PLACEMENT) {
         // add a rotate button to toggle orientation
         const rotateButton = document.createElement('button');
