@@ -37,8 +37,16 @@ body {
     font-size: 18px;
 }
 
+.board-tile.ship {
+    background-color: rgb(9, 94, 44);
+}
+
+.ship-preview {
+    background-color: rgb(9, 94, 44);
+}
+
 .board-tile.hit {
-    background-color: #ff4444;
+    background-color: rgb(104, 11, 11);
     color: white;
 }
 
@@ -60,16 +68,8 @@ body {
     text-align: center;
 }
 
-.ship {
-    background-color: rgb(104, 11, 11);
-}
-
-.ship-preview {
-    background-color: rgb(104, 11, 11);
-}
-
 /* fog of war */
-.gameboard.fogged .board-tile.ship {
+.gameboard.fogged .board-tile.ship:not(.hit):not(.miss){
     background-color: lightblue; 
 }
 
