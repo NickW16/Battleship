@@ -68,6 +68,11 @@ body {
     background-color: rgb(104, 11, 11);
 }
 
+/* fog of war */
+.gameboard.fogged .board-tile.ship {
+    background-color: lightblue; 
+}
+
 /* .board-tile:hover {
     background-color: green;
 } */

@@ -8,23 +8,19 @@ const GAME_PHASES = {
     GAME_OVER: 'game-over',
 }
 
-function switchPlayer(player = 'both') {
-    const gameboards = document.querySelectorAll('.gameboard');
+// player-switching feature:
+const switchPlayer = (player) => {
+    const currentPlayer = player || game.currentPlayer();
+    const player1Board = document.querySelector('[data-player="player1"]');
+    const player2Board = document.querySelector('[data-player="player2"]');
 
-    // identify which gameboards belongs to each player:
-    gameboards[0].dataset.player = 'player1';
-    gameboards[1].dataset.player = 'player2';
-    // player-switching feature:
-    if (player === game.state().player1) {
-        gameboards[0].style.display = 'grid'; // show player 1 board
-        gameboards[1].style.display = 'none';
-    } else if (player === game.state().player2) {
-        gameboards[0].style.display = 'none'; // show player 2 board
-        gameboards[1].style.display = 'grid';
+    if (currentPlayer.name === 'Player 1') {
+        player1Board.classList.remove('fogged');
+        player2Board.classList.add('fogged');        
     } else {
-        gameboards[0].style.display = 'grid'; // show both boards
-        gameboards[1].style.display = 'grid';
-    }
+        player2Board.classList.remove('fogged');
+        player1Board.classList.add('fogged');
+    }    
 };
 
 // define stuff for later use in DOM:
@@ -119,7 +115,8 @@ function handleAttack(e) {
             tile.textContent = '💦';
         }
 
-        switchPlayer(currentPlayer);
+        switchPlayer();
+
         // update turn indicator's content
         turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
 
@@ -136,6 +133,8 @@ const setupBattlePhase = () => {
     currentPhase = GAME_PHASES.BATTLE;
     turnIndicator.textContent = 'Battle! Player 1\'s Turn.';
     
+    switchPlayer();
+
     // clean up placement UI
     const rotateButton = document.querySelector('button');
     if (rotateButton) rotateButton.remove();
@@ -178,7 +177,6 @@ function handleShipPlacement(e) {
         if (currentShipIndex < shipsToPlace.length) {
             turnIndicator.textContent = `Placement Phase: ${currentPlacingPlayer.name}, place your ${shipsToPlace[currentShipIndex].name}`;
         }
-
         // this player is done placing ships?
         if (currentShipIndex >= shipsToPlace.length) {
             // if player 1 is done:
@@ -187,12 +185,11 @@ function handleShipPlacement(e) {
                 // switch to player 2
                 currentPlacingPlayer = game.state().player2;
                 currentShipIndex = 0;
-                switchPlayer(currentPlacingPlayer);
                 // re-run setup for Player 2
-                setupPlacementPhase(); 
+                switchPlayer(currentPlacingPlayer);
+                setupPlacementPhase();
             } else {
                 // Both players are done, start the battle
-                switchPlayer(); // show both boards
                 setupBattlePhase();
             }
         }
