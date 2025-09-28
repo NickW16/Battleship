@@ -137,7 +137,8 @@ function handleAttack(e) {
 
         if (game.isGameOver()) {
             title.textContent = `${currentPlayer.name} Wins!`;
-            turnIndicator.textContent = 'Game Over!';       
+            turnIndicator.textContent = 'Game Over!';
+            return; // stop here, don't switch turns      
         }
 
 
