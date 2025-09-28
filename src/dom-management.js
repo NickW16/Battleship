@@ -1,6 +1,8 @@
 const createGame = require('./game-logic');
 const { createFleet, shipTypes, ship } = require('./ship');
-const game = createGame(); // initialize the game
+
+const isVsCPU = true; // for cpu game
+const game = createGame(isVsCPU); // initialize the game
 
 const GAME_PHASES = {
     PLACEMENT: 'placement',
@@ -10,17 +12,25 @@ const GAME_PHASES = {
 
 // player-switching feature:
 const switchPlayer = (player) => {
-    const currentPlayer = player || game.currentPlayer();
     const player1Board = document.querySelector('[data-player="player1"]');
     const player2Board = document.querySelector('[data-player="player2"]');
 
-    if (currentPlayer.name === 'Player 1') {
+    const playerToShow = player || game.currentPlayer();
+
+    if (playerToShow.name === 'Player 1') {
         player1Board.classList.remove('fogged');
-        player2Board.classList.add('fogged');        
+        player2Board.classList.add('fogged');
     } else {
         player2Board.classList.remove('fogged');
         player1Board.classList.add('fogged');
     }    
+};
+
+// helper function to get player board's id
+const getPlayerBoardId = (player) => {
+    if (player.name === 'Player 1') return 'player1';
+    if (player.name === 'CPU') return 'player2'; // CPU uses player2's board
+    return 'player2'; // player 2 also uses player2's board
 };
 
 // define stuff for later use in DOM:
@@ -31,7 +41,8 @@ let title = document.getElementById('title');
 let currentPhase = GAME_PHASES.PLACEMENT;
 let currentPlacingPlayer = game.state().player1;
 let currentShipIndex = 0;
-// array with shipts to be placed
+
+// array with ships to be placed
 const shipsToPlace = [
     { name: 'Carrier', length: shipTypes.CARRIER },
     { name: 'Battleship', length: shipTypes.BATTLESHIP },
@@ -64,7 +75,9 @@ function handlePlacementHover(e) {
             break;
         }
 
-        const selector = `[data-player="${currentPlacingPlayer.name.toLowerCase().replace(' ', '')}"] [data-x="${currentX}"][data-y="${currentY}"]`;
+        // using helper function to make it easier:
+        const playerBoardId = getPlayerBoardId(currentPlacingPlayer);
+        const selector = `[data-player="${playerBoardId}"] [data-x="${currentX}"][data-y="${currentY}"]`;
         const segmentTile = document.querySelector(selector);
 
         // check if tile exists or is already occupied by a placed ship
@@ -84,7 +97,7 @@ function handlePlacementHover(e) {
 }
 // for when placement phase ends:
 function handlePlacementLeave() {
-    //find all tiles with a preview class and remove it
+    // find all tiles with a preview class and remove it
     document.querySelectorAll('.ship-preview, .ship-preview-invalid').forEach(tile => {
         tile.classList.remove('ship-preview', 'ship-preview-invalid');
     });
@@ -101,11 +114,13 @@ function handleAttack(e) {
     // define current player, attacker and defender
     const currentPlayer = game.currentPlayer();
     const defender = (currentPlayer === game.state().player1) ? game.state().player2 : game.state().player1;
+    
     const targetBoardName = (currentPlayer === game.state().player1) ? 'player2' : 'player1';
 
     // only allow attacking the opponent's board:
     if (boardPlayer === targetBoardName) {
         const result = game.attack(currentPlayer, defender, x, y);
+
         // visual effects of hitting or missing:
         if (result === 'hit') {
             tile.classList.add('hit');
@@ -124,8 +139,49 @@ function handleAttack(e) {
             title.textContent = `${currentPlayer.name} Wins!`;
             turnIndicator.textContent = 'Game Over!';       
         }
+
+
+        const nextPlayer = game.currentPlayer();
+        // just a little delay for CPU's turn to not be instant
+        if (isVsCPU && nextPlayer.CPU) {
+            setTimeout(executeCpuTurn, 1000);
+        }
     }    
-}
+};
+
+// function to execute cpu's turn
+const executeCpuTurn = () => {
+    const cpu = game.currentPlayer();
+    const humanPlayer = game.state().player1;
+
+    // cpu generates coordinates
+    const { x, y } = cpu.generateAttack();
+
+    // cpu attacks
+    const result = game.attack(cpu, humanPlayer, x, y);
+
+    // update ui
+    const attackedTile = document.querySelector(`[data-player="player1"] [data-x="${x}"][data-y="${y}"]`);
+    if (attackedTile) {
+        if (result === 'hit') {
+            attackedTile.classList.add('hit');
+            attackedTile.textContent = '💥';
+        } else if (result === 'miss') {
+            attackedTile.classList.add('miss');
+            attackedTile.textContent = '💦';
+        }
+    }
+
+    // update indicators
+    turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
+    if (game.isGameOver()) {
+        title.textContent = 'CPU Wins!';
+        turnIndicator.textContent = 'Game Over!';
+    } else {
+        switchPlayer(); // switch back to human player
+    }
+};
+
 
 // this setups the battle phase!
 const setupBattlePhase = () => {
@@ -152,6 +208,21 @@ const setupBattlePhase = () => {
     });
 };
 
+// function to place cpu ships automatically
+const placeCpuShips = () => {
+    const cpuPlayer = game.state().player2;
+    shipsToPlace.forEach(shipInfo => {
+        let placed = false;
+        while (!placed) {
+            const x = Math.floor(Math.random() * 10);
+            const y = Math.floor(Math.random() * 10);
+            const isVertical = Math.random() > 0.5; // randomize if its going to place vertically or not 50/50
+            const shipToPlace = ship(shipInfo.length);
+            placed = cpuPlayer.gameboard.placeShip(shipToPlace, x, y, isVertical);
+        }
+    });
+};
+
 function handleShipPlacement(e) {
     const tile = e.target;
     const x = parseInt(tile.dataset.x);
@@ -162,12 +233,15 @@ function handleShipPlacement(e) {
     const shipToPlace = ship(shipInfo.length);
 
     if (currentPlacingPlayer.gameboard.placeShip(shipToPlace, x, y, isVertical)) {
+        // helper function
+        const playerBoardId = getPlayerBoardId(currentPlacingPlayer);
+        
         // visually update the board to show the placed ship
         for (let i = 0; i < shipInfo.length; i++) {
             const shipX = isVertical ? x + i : x;
             const shipY = isVertical ? y : y + i;
             // huge tile info update:
-            const placedTile = document.querySelector(`[data-player="${currentPlacingPlayer.name.toLowerCase().replace(' ', '')}"] [data-x="${shipX}"][data-y="${shipY}"]`);        
+            const placedTile = document.querySelector(`[data-player="${playerBoardId}"] [data-x="${shipX}"][data-y="${shipY}"]`);        
             if(placedTile) placedTile.classList.add('ship');
         }
 
@@ -179,8 +253,12 @@ function handleShipPlacement(e) {
         }
         // this player is done placing ships?
         if (currentShipIndex >= shipsToPlace.length) {
-            // if player 1 is done:
-            if (currentPlacingPlayer.name === 'Player 1') {
+            if (isVsCPU) {
+                // if its a cpu game, place ships and start battle
+                placeCpuShips();
+                setupBattlePhase();
+            } else if (currentPlacingPlayer.name === 'Player 1') {
+                // PvP mode, switch to player 2
                 turnIndicator.textContent = 'Player 1 finished. Now player 2 places ships.';
                 // switch to player 2
                 currentPlacingPlayer = game.state().player2;
@@ -189,7 +267,7 @@ function handleShipPlacement(e) {
                 switchPlayer(currentPlacingPlayer);
                 setupPlacementPhase();
             } else {
-                // Both players are done, start the battle
+                // Both players are done, start the battle (PvP mode)
                 setupBattlePhase();
             }
         }
@@ -203,6 +281,8 @@ const setupPlacementPhase = () => {
     const turnIndicator = document.getElementById('turn-indicator');
     turnIndicator.textContent = `Placement Phase: ${currentPlacingPlayer.name}, place your ${shipsToPlace[currentShipIndex].name}`;
 
+    switchPlayer(currentPlacingPlayer);
+
     const gameboards = document.querySelectorAll('.gameboard');
     // remove all old listeners first
     gameboards.forEach(board => {
@@ -214,7 +294,9 @@ const setupPlacementPhase = () => {
     });
 
     // add listeners only to the current player's board
-    const playerBoard = document.querySelector(`[data-player="${currentPlacingPlayer.name.toLowerCase().replace(' ', '')}"]`);
+    const playerBoardId = getPlayerBoardId(currentPlacingPlayer);
+    const playerBoard = document.querySelector(`[data-player="${playerBoardId}"]`);    
+    
     playerBoard.querySelectorAll('.board-tile').forEach(tile => {
         // listeners for hovers and placements:
         tile.addEventListener('click', handleShipPlacement);

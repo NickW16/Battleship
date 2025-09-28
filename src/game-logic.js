@@ -1,10 +1,10 @@
 const { createPlayer } = require('./player');
 
-const createGame = () => {
+const createGame = (isVsCPU = false) => {
     // game state
     const gameState = {
         player1: createPlayer('Player 1'),
-        player2: createPlayer('Player 2'),
+        player2: createPlayer(isVsCPU ? 'CPU' : 'Player 2', isVsCPU), //create CPU
         currentPlayer: null,
         gameOver: false
     };
