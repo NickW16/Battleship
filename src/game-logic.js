@@ -36,6 +36,11 @@ const createGame = (isVsCPU = false) => {
             return 'game-over';
         }
 
+        // notify CPU about attack results (for smart AI)
+        if (attacker.CPU && attacker.recordAttackResult) {
+            attacker.recordAttackResult(x, y, result);
+        }
+
         // switch turns if attack was valid and game isnt over yet
         if (result !== false) {
             switchTurn();

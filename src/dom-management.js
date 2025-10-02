@@ -1,8 +1,51 @@
 const createGame = require('./game-logic');
 const { createFleet, shipTypes, ship } = require('./ship');
 
-const isVsCPU = true; // for cpu game
-const game = createGame(isVsCPU); // initialize the game
+let isVsCPU = true; // for cpu game
+let game = createGame(isVsCPU); // initialize the game
+
+// settings dialog section:
+const settingsButton = document.getElementById('settings-button');
+const settingsDialog = document.getElementById('settings-dialog');
+const closeDialog = document.getElementById('close-dialog');
+
+// open dialog
+settingsButton.addEventListener('click', () => {
+    settingsDialog.showModal();
+});
+
+// close dialog
+closeDialog.addEventListener('click', () => {
+    settingsDialog.close();
+});
+
+settingsDialog.addEventListener('close', () => {
+    let cpuMode = document.getElementById('cpu-mode');
+    if (cpuMode.checked) {
+        isVsCPU = true
+    } else {
+        isVsCPU = false
+    }
+    restartGame();
+});
+
+const restartGame = () => {
+    game = createGame(isVsCPU);
+    
+    // reset game state
+    currentPhase = GAME_PHASES.PLACEMENT;
+    currentPlacingPlayer = game.state().player1;
+    currentShipIndex = 0;
+    
+    // clear the boards and reinitialize
+    const gameboards = document.querySelectorAll('.gameboard');
+    gameboards.forEach(board => {
+        board.innerHTML = ''; // clear existing tiles
+    });
+    
+    // reinitialize the game
+    manageDOM();
+};
 
 const GAME_PHASES = {
     PLACEMENT: 'placement',
@@ -361,14 +404,17 @@ const manageDOM = () => {
     // this is the starting point of the game logic
     if (currentPhase === GAME_PHASES.PLACEMENT) {
         // add a rotate button to toggle orientation
-        const rotateButton = document.createElement('button');
-        rotateButton.textContent = 'Rotate Ship (Current: Horizontal)';
-        rotateButton.onclick = () => {
-            isVertical = !isVertical;
-            rotateButton.textContent = `Rotate Ship (Current: ${isVertical ? 'Vertical' : 'Horizontal'})`;
-        };
-        document.body.insertBefore(rotateButton, document.getElementById('gameboards-section'));
-        
+        let rotateButton = document.getElementById('rotate-button');
+        if (!rotateButton) {
+            rotateButton = document.createElement('button');
+            rotateButton.id = 'rotate-button';
+            rotateButton.textContent = 'Rotate Ship (Current: Horizontal)';
+            rotateButton.onclick = () => {
+                isVertical = !isVertical;
+                rotateButton.textContent = `Rotate Ship (Current: ${isVertical ? 'Vertical' : 'Horizontal'})`;
+            };
+            document.body.insertBefore(rotateButton, document.getElementById('gameboards-section'));            
+        }    
         setupPlacementPhase();
     }
 };

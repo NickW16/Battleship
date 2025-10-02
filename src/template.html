@@ -18,5 +18,21 @@
         </div>
     </div>
     <button id="settings-button">Game Settings</button>
+<!--dialog for cpu mode and settings-->
+    <dialog id="settings-dialog">
+        <h2>Game Settings</h2>
+        <form method="dialog">
+            <label>
+                <input type="checkbox" id="cpu-mode"> Play vs CPU
+            </label>
+            <div id="restart-div">
+                <button id="restart-game">Restart Game</button>
+            </div>
+            <div id="form-buttons">
+                <button type="submit" id="confirm">Confirm</button>
+                <button type="button" id="close-dialog">Close</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 </html>
