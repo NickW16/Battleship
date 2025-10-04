@@ -147,6 +147,11 @@ function handlePlacementLeave() {
 }
 
 function handleAttack(e) {
+    // early return if it's CPU's turn
+    if (isVsCPU && game.currentPlayer().CPU) {
+        return;
+    }
+
     const tile = e.target;
     if (game.isGameOver() || tile.classList.contains('hit') || tile.classList.contains('miss')) return;
 
@@ -190,11 +195,14 @@ function handleAttack(e) {
         if (isVsCPU && nextPlayer.CPU) {
             setTimeout(executeCpuTurn, 1000);
         }
-    }    
+    }
 };
 
 // function to execute cpu's turn
 const executeCpuTurn = () => {
+    // disable interactions during CPU turn, to prevent bugs :
+    disablePlayerInteractions();
+
     const cpu = game.currentPlayer();
     const humanPlayer = game.state().player1;
 
@@ -221,8 +229,13 @@ const executeCpuTurn = () => {
     if (game.isGameOver()) {
         title.textContent = 'CPU Wins!';
         turnIndicator.textContent = 'Game Over!';
+        enablePlayerInteractions(); // re-enable in case of a new game
     } else {
         switchPlayer(); // switch back to human player
+        // only re-enable if it's player's turn
+        if (!game.currentPlayer().CPU) {
+            enablePlayerInteractions();
+        }
     }
 };
 
@@ -417,6 +430,35 @@ const manageDOM = () => {
         }    
         setupPlacementPhase();
     }
+};
+
+
+// board-disabling helper functions:
+// disable board:
+const disablePlayerInteractions = () => {
+    const playerBoard = document.querySelector('[data-player="player1"]');
+    const enemyBoard = document.querySelector('[data-player="player2"]');
+
+    // disable player's board
+    playerBoard.style.pointerEvents = 'none';
+    playerBoard.style.opacity = '0.7';
+
+    // also disable enemy board during CPU turn (for consistency)
+    enemyBoard.style.pointerEvents = 'none';
+    enemyBoard.style.opacity = '0.7';
+};
+// enable board:
+const enablePlayerInteractions = () => {
+    const playerBoard = document.querySelector('[data-player="player1"]');
+    const enemyBoard = document.querySelector('[data-player="player2"]');
+    
+    // enable player's own board
+    playerBoard.style.pointerEvents = 'auto';
+    playerBoard.style.opacity = '1';
+    
+    // enable enemy board for attacking
+    enemyBoard.style.pointerEvents = 'auto';
+    enemyBoard.style.opacity = '1';
 };
 
 module.exports = { manageDOM };
