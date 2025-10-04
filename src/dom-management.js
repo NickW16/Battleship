@@ -1,6 +1,12 @@
 const createGame = require('./game-logic');
 const { createFleet, shipTypes, ship } = require('./ship');
 
+const GAME_PHASES = {
+    PLACEMENT: 'placement',
+    BATTLE: 'battle',
+    GAME_OVER: 'game-over',
+}
+
 let isVsCPU = true; // for cpu game
 let game = createGame(isVsCPU); // initialize the game
 
@@ -36,6 +42,10 @@ const restartGame = () => {
     currentPhase = GAME_PHASES.PLACEMENT;
     currentPlacingPlayer = game.state().player1;
     currentShipIndex = 0;
+
+    // these 2 are to properly reset the ui!
+    enablePlayerInteractions();
+    updateShipPreviewImage();
     
     // clear the boards and reinitialize
     const gameboards = document.querySelectorAll('.gameboard');
@@ -47,11 +57,11 @@ const restartGame = () => {
     manageDOM();
 };
 
-const GAME_PHASES = {
-    PLACEMENT: 'placement',
-    BATTLE: 'battle',
-    GAME_OVER: 'game-over',
-}
+// restart button!
+const restartButton = document.getElementById('restart-game');
+restartButton.addEventListener('click', () => {
+    restartGame();
+});
 
 // player-switching feature:
 const switchPlayer = (player) => {
@@ -76,6 +86,22 @@ const getPlayerBoardId = (player) => {
     return 'player2'; // player 2 also uses player2's board
 };
 
+// updates ship image to the screen!
+const updateShipPreviewImage = () => {
+    if (currentShipIndex < shipsToPlace.length) {
+        const shipName = shipsToPlace[currentShipIndex].name;
+        const shipImageEl = document.getElementById('ship-image');
+        if (shipImageEl) {
+            shipImageEl.style.display = 'block';
+            shipImageEl.src = shipImages[shipName];
+        }
+    } else {
+        // hides the ships on battle start!
+        const shipImageEl = document.getElementById('ship-image');
+        shipImageEl.style.display = 'none';
+    }
+};
+
 // define stuff for later use in DOM:
 let turnIndicator = document.getElementById('turn-indicator');
 let title = document.getElementById('title');
@@ -93,6 +119,15 @@ const shipsToPlace = [
     { name: 'Submarine', length: shipTypes.SUBMARINE },
     { name: 'Patrol Boat', length: shipTypes.PATROLBOAT },
 ];
+
+// images for ships
+const shipImages = {
+    'Carrier': require('./img/carrier.png'),
+    'Battleship': require('./img/battleship.png'),
+    'Destroyer': require('./img/destroyer.png'),
+    'Submarine': require('./img/submarine.png'),
+    'Patrol Boat': require('./img/patrolboat.png'),
+};
 
 let isVertical = false; // to track ship orientation
 
@@ -304,6 +339,9 @@ function handleShipPlacement(e) {
 
         currentShipIndex++; // move to next ship
 
+        
+        updateShipPreviewImage();
+
         // this is to show Which ship is being placed !
         if (currentShipIndex < shipsToPlace.length) {
             turnIndicator.textContent = `Placement Phase: ${currentPlacingPlayer.name}, place your ${shipsToPlace[currentShipIndex].name}`;
@@ -337,6 +375,8 @@ function handleShipPlacement(e) {
 const setupPlacementPhase = () => {
     const turnIndicator = document.getElementById('turn-indicator');
     turnIndicator.textContent = `Placement Phase: ${currentPlacingPlayer.name}, place your ${shipsToPlace[currentShipIndex].name}`;
+
+    updateShipPreviewImage();
 
     switchPlayer(currentPlacingPlayer);
 

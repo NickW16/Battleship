@@ -17,7 +17,7 @@ body {
 #gameboards-section {
     display: flex;
     gap: 20px;
-    padding: 70px;
+    padding: 20px;
 }
 
 .gameboard {
@@ -89,4 +89,29 @@ button {
 button:hover {
     background-color: green;
     color: white;
+}
+
+ /* css for smooth transition between turns: */
+.board-tile:not(.hit):not(.miss) {
+    transition: all 0.2s ease;
+}
+
+.gameboard.disabled .board-tile {
+    cursor: not-allowed;
+    background-color: #e0e0e0;
+}
+
+/* visual indicator for whose turn it is */
+.turn-indicator-player .player-highlight {
+    color: green;
+    font-weight: bold;
+}
+
+.turn-indicator-cpu .cpu-highlight {
+    color: red;
+    font-weight: bold;
+}
+
+#ship-image {
+    height: 100px;
 }

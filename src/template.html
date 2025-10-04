@@ -7,8 +7,13 @@
 </head>
 <body>
     <div id="title"></div>
+
     <div id="turn-indicator"></div>
-    <button id="start-button">Start Game</button>
+
+    <div id="art-preview">
+        <img id="ship-image">
+    </div>
+
     <div id="gameboards-section">
         <div id="gameboard-one" class="gameboard">
 
@@ -17,7 +22,10 @@
 
         </div>
     </div>
-    <button id="settings-button">Game Settings</button>
+    <div id="options-buttons">
+        <button id="settings-button">Game Settings</button>        
+        <button id="restart-game">Restart Game</button>
+    </div>
 <!--dialog for cpu mode and settings-->
     <dialog id="settings-dialog">
         <h2>Game Settings</h2>
@@ -25,9 +33,6 @@
             <label>
                 <input type="checkbox" id="cpu-mode"> Play vs CPU
             </label>
-            <div id="restart-div">
-                <button id="restart-game">Restart Game</button>
-            </div>
             <div id="form-buttons">
                 <button type="submit" id="confirm">Confirm</button>
                 <button type="button" id="close-dialog">Close</button>
