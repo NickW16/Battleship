@@ -115,3 +115,18 @@ button:hover {
 #ship-image {
     height: 100px;
 }
+
+/* pass turn feature (for pvp) */
+#pass-turn-overlay {
+    padding: 20px;
+    text-align: center;
+}
+
+#pass-turn-overlay.hidden {
+    display: none;
+}
+
+#pass-timer {
+    font-size: 3em;
+    margin-top: 20px;
+}

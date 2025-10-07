@@ -188,8 +188,6 @@ function handleAttack(e) {
     }
 
     const tile = e.target;
-    if (game.isGameOver() || tile.classList.contains('hit') || tile.classList.contains('miss')) return;
-
     const x = parseInt(tile.dataset.x);
     const y = parseInt(tile.dataset.y);
     const boardPlayer = tile.dataset.player;
@@ -213,17 +211,19 @@ function handleAttack(e) {
             tile.textContent = '💦';
         }
 
-        switchPlayer();
-
-        // update turn indicator's content
-        turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
-
         if (game.isGameOver()) {
-            title.textContent = `${currentPlayer.name} Wins!`;
-            turnIndicator.textContent = 'Game Over!';
-            return; // stop here, don't switch turns      
+            // timeout to update ui before ending game
+            setTimeout(() => {
+                title.textContent = `${currentPlayer.name} Wins!`; // Use the original currentPlayer
+                turnIndicator.textContent = 'Game Over!';
+                disablePlayerInteractions();
+            }, 0);
+            return;
         }
 
+        // If the game is not over, switch turns
+        switchPlayer();
+        turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
 
         const nextPlayer = game.currentPlayer();
         // just a little delay for CPU's turn to not be instant
@@ -235,7 +235,6 @@ function handleAttack(e) {
 
 // function to execute cpu's turn
 const executeCpuTurn = () => {
-    // disable interactions during CPU turn, to prevent bugs :
     disablePlayerInteractions();
 
     const cpu = game.currentPlayer();
@@ -259,19 +258,19 @@ const executeCpuTurn = () => {
         }
     }
 
-    // update indicators
-    turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
     if (game.isGameOver()) {
-        title.textContent = 'CPU Wins!';
-        turnIndicator.textContent = 'Game Over!';
-        enablePlayerInteractions(); // re-enable in case of a new game
-    } else {
-        switchPlayer(); // switch back to human player
-        // only re-enable if it's player's turn
-        if (!game.currentPlayer().CPU) {
-            enablePlayerInteractions();
-        }
+        setTimeout(() => {
+            title.textContent = 'CPU Wins!';
+            turnIndicator.textContent = 'Game Over!';
+            // no need to re-enable interactions here, restart will handle it
+        }, 0);
+        return;
     }
+
+    // If the game is not over, switch back to human player
+    switchPlayer();
+    turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
+    enablePlayerInteractions();
 };
 
 
