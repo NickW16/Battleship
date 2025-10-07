@@ -77,6 +77,10 @@ const switchPlayer = (player) => {
         player2Board.classList.remove('fogged');
         player1Board.classList.add('fogged');
     }    
+
+    if (currentPhase === GAME_PHASES.BATTLE) {
+        updateShipPreviewImage();
+    }
 };
 
 // helper function to get player board's id
@@ -87,18 +91,27 @@ const getPlayerBoardId = (player) => {
 };
 
 // updates ship image to the screen!
+// also updates the image for battle start!
 const updateShipPreviewImage = () => {
-    if (currentShipIndex < shipsToPlace.length) {
+    const shipImageEl = document.getElementById('ship-image');
+    if (!shipImageEl) return; // safety check
+
+    if (currentPhase === GAME_PHASES.PLACEMENT && currentShipIndex < shipsToPlace.length) {
+        // logic for placement phase
         const shipName = shipsToPlace[currentShipIndex].name;
-        const shipImageEl = document.getElementById('ship-image');
-        if (shipImageEl) {
-            shipImageEl.style.display = 'block';
-            shipImageEl.src = shipImages[shipName];
+        shipImageEl.style.display = 'block';
+        shipImageEl.src = shipImages[shipName];
+    } else if (currentPhase === GAME_PHASES.BATTLE) {
+        // player 1
+        const currentPlayer = game.currentPlayer();
+        if (currentPlayer.name === 'Player 1') {
+            shipImageEl.src = engagePlayer1;
+        } else { // cpu and player 2
+            shipImageEl.src = engagePlayer2;
         }
     } else {
-        // hides the ships on battle start!
-        const shipImageEl = document.getElementById('ship-image');
-        shipImageEl.style.display = 'none';
+        // update image if game is over
+        shipImageEl.src = gameOverImage1;
     }
 };
 
@@ -119,6 +132,11 @@ const shipsToPlace = [
     { name: 'Submarine', length: shipTypes.SUBMARINE },
     { name: 'Patrol Boat', length: shipTypes.PATROLBOAT },
 ];
+
+// start battle image:
+const engagePlayer1 = require('./img/engageP1.png');
+const engagePlayer2 = require('./img/engageP2.png');
+const gameOverImage1 = require('./img/game-over1.png');
 
 // images for ships
 const shipImages = {
@@ -212,12 +230,14 @@ function handleAttack(e) {
         }
 
         if (game.isGameOver()) {
+            currentPhase = GAME_PHASES.GAME_OVER; // explicitly set the phase to prevent not updating the ui
             // timeout to update ui before ending game
             setTimeout(() => {
                 title.textContent = `${currentPlayer.name} Wins!`; // Use the original currentPlayer
                 turnIndicator.textContent = 'Game Over!';
+                updateShipPreviewImage(); // update to 'gameover' image 
                 disablePlayerInteractions();
-            }, 0);
+            }, 50);
             return;
         }
 
@@ -262,8 +282,9 @@ const executeCpuTurn = () => {
         setTimeout(() => {
             title.textContent = 'CPU Wins!';
             turnIndicator.textContent = 'Game Over!';
+            updateShipPreviewImage(); // update do 'gameover' image
             // no need to re-enable interactions here, restart will handle it
-        }, 0);
+        }, 50);
         return;
     }
 
@@ -280,6 +301,8 @@ const setupBattlePhase = () => {
     currentPhase = GAME_PHASES.BATTLE;
     turnIndicator.textContent = 'Battle! Player 1\'s Turn.';
     
+    updateShipPreviewImage();
+
     switchPlayer();
 
     // clean up placement UI

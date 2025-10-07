@@ -113,7 +113,9 @@ button:hover {
 }
 
 #ship-image {
-    height: 100px;
+    height: 150px;
+    padding: 5px;
+    border-radius: 20px;
 }
 
 /* pass turn feature (for pvp) */
