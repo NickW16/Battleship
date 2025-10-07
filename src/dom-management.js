@@ -43,6 +43,10 @@ const restartGame = () => {
     currentPlacingPlayer = game.state().player1;
     currentShipIndex = 0;
 
+    // clean up placement UI
+    const rotateButton = document.getElementById('rotate-button');
+    if (rotateButton) rotateButton.remove();
+
     // these 2 are to properly reset the ui!
     enablePlayerInteractions();
     updateShipPreviewImage();
@@ -306,7 +310,7 @@ const setupBattlePhase = () => {
     switchPlayer();
 
     // clean up placement UI
-    const rotateButton = document.querySelector('button');
+    const rotateButton = document.getElementById('rotate-button');
     if (rotateButton) rotateButton.remove();
 
     const gameboards = document.querySelectorAll('.gameboard');
