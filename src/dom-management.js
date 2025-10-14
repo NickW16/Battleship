@@ -27,12 +27,12 @@ closeDialog.addEventListener('click', () => {
 
 settingsDialog.addEventListener('close', () => {
     let cpuMode = document.getElementById('cpu-mode');
-    if (cpuMode.checked) {
-        isVsCPU = true
-    } else {
-        isVsCPU = false
+    const newIsVsCPU = cpuMode.checked;
+
+    if(newIsVsCPU !== isVsCPU) {
+        isVsCPU = newIsVsCPU;
+        restartGame();
     }
-    restartGame();
 });
 
 const restartGame = () => {
