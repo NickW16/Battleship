@@ -56,6 +56,23 @@ body {
     font-size: 50px;
     color: rgb(19, 6, 6);
 }
+/* pass-turn screen styling */
+#pass-turn-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(43, 71, 116, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    z-index: 1000;
+    color: white;
+    font-family: var(--main-font);
+}
 
 /* gameboards */
 #gameboards-section {
@@ -106,8 +123,8 @@ body {
 #turn-indicator {
     background-color: #f0f0f0;
     padding: 10px 20px;
-    margin: 24px;
     border-radius: 5px;
+    margin: 1%;
     border: 2px solid var(--color-dark-green);
     text-align: center;
 }

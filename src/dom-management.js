@@ -10,6 +10,45 @@ const GAME_PHASES = {
 let isVsCPU = true; // for cpu game
 let game = createGame(isVsCPU); // initialize the game
 
+const showPassScreen = () => {
+    // only shows on pvp
+    if (!isVsCPU) {
+        const passOverlay = document.getElementById('pass-turn-overlay');
+        const passMessage = document.getElementById('pass-message');
+        const currentPlayer = game.currentPlayer();
+
+        passMessage.textContent = `Pass to ${currentPlayer.name}`;
+
+        // show pass overlay
+        passOverlay.classList.remove('hidden');
+
+        // conceal both boards with fog of war
+        const player1Board = document.querySelector('[data-player="player1"]');
+        const player2Board = document.querySelector('[data-player="player2"]');
+        player1Board.classList.add('fogged');
+        player2Board.classList.add('fogged');
+
+        //disable players:
+        disablePlayerInteractions();
+    }
+};
+
+const hidePassScreen = () => {
+    const passOverlay = document.getElementById('pass-turn-overlay');
+    passOverlay.classList.add('hidden');
+
+    switchPlayer(); // this is for un-fogging the board
+    enablePlayerInteractions();
+};
+
+// start turn button
+document.addEventListener('DOMContentLoaded', () => {
+    const startTurnBtn = document.getElementById('start-turn');
+    if (startTurnBtn) {
+        startTurnBtn.addEventListener('click', hidePassScreen);
+    }
+});
+
 // settings dialog section:
 const settingsButton = document.getElementById('settings-button');
 const settingsDialog = document.getElementById('settings-dialog');
@@ -249,6 +288,11 @@ function handleAttack(e) {
         switchPlayer();
         turnIndicator.textContent = `Current Turn: ${game.currentPlayer().name}`;
 
+        // pvp's pass turn screen:
+        if (!isVsCPU) {
+            showPassScreen();
+        }
+
         const nextPlayer = game.currentPlayer();
         // just a little delay for CPU's turn to not be instant
         if (isVsCPU && nextPlayer.CPU) {
@@ -304,6 +348,7 @@ const setupBattlePhase = () => {
     // change phase:
     currentPhase = GAME_PHASES.BATTLE;
     turnIndicator.textContent = 'Battle! Player 1\'s Turn.';
+
     
     updateShipPreviewImage();
 
@@ -324,6 +369,10 @@ const setupBattlePhase = () => {
             newTile.addEventListener('click', handleAttack);
         });
     });
+
+    if (!isVsCPU) {
+        showPassScreen();
+    }
 };
 
 // function to place cpu ships automatically
@@ -396,7 +445,7 @@ function handleShipPlacement(e) {
         // placement failed:
         turnIndicator.textContent = 'Invalid Placement, Try again.';
     }
-}
+};
 
 const setupPlacementPhase = () => {
     const turnIndicator = document.getElementById('turn-indicator');
