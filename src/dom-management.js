@@ -510,11 +510,15 @@ const manageDOM = () => {
     gameboards[0].dataset.player = 'player1';
     gameboards[1].dataset.player = 'player2';
 
+    // for mobile:
+    const isMobile = window.innerWidth <= 768;
+    const tileSize = isMobile ? '25px' : '40px';
+
     // change: this part just creates the visual grid ---
     gameboards.forEach((gameboard, index) => {
         gameboard.style.display = 'grid';
-        gameboard.style.gridTemplateColumns = 'repeat(10, 40px)';
-        gameboard.style.gridTemplateRows = 'repeat(10, 40px)';
+        gameboard.style.gridTemplateColumns = `repeat(10, ${tileSize})`;
+        gameboard.style.gridTemplateRows = `repeat(10, ${tileSize})`;
         // ... other styles
 
         for(let i = 0; i < 100; i++) {
